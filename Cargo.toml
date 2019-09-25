@@ -1,0 +1,17 @@
+[package]
+name = "reaper_engine"
+version = "0.1.0"
+authors = ["Christian Roy <christian.50.roy@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.9"
+log = "0.4.8"
+fern = "0.5.8"
+winit = "0.19.3"
+
+imgui-glium-renderer = "0.2.0"
+glium = "0.25.1"
+imgui-winit-support = "0.2.1"
