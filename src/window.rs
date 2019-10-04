@@ -1,7 +1,6 @@
 extern crate winit;
 
 use winit::Event as WinitEvent;
-use winit::Window as WinitWindow;
 
 use crate::event;
 
@@ -21,12 +20,16 @@ impl WindowProps {
     }
 }
 
-pub struct Window {
-    winit_events_loop: winit::EventsLoop,
-    winit_window: WinitWindow,
+pub trait Window {
+    fn on_update(&mut self, ed: &mut event::EventDispatcher);
 }
 
-impl Window {
+pub struct WinitWindow {
+    winit_events_loop: winit::EventsLoop,
+    winit_window: winit::Window,
+}
+
+impl WinitWindow {
     pub fn new(props: &WindowProps) -> Self {
         let winit_events_loop = winit::EventsLoop::new();
         let dpi = winit_events_loop.get_primary_monitor().get_hidpi_factor();
@@ -44,13 +47,19 @@ impl Window {
             &props.title, props.width, props.height
         );
 
-        Window {
+        Self {
             winit_events_loop,
             winit_window,
         }
     }
 
-    pub fn on_update(&mut self, event_dispatcher: &mut event::Dispatcher) {
+    pub fn get_winit_window(&self) -> &winit::Window {
+        &self.winit_window
+    }
+}
+
+impl Window for WinitWindow {
+    fn on_update(&mut self, event_dispatcher: &mut event::EventDispatcher) {
         use event::{Event, EventType};
         use winit::WindowEvent as WinitWindowEventType;
         use WinitEvent::DeviceEvent as WinitDeviceEvent;

@@ -42,12 +42,12 @@ pub enum EventType {
     MouseScrolled { scroll: u32 },
 }
 
-pub struct Dispatcher {
+pub struct EventDispatcher {
     sender: Sender<Event>,
     receiver: Receiver<Event>,
 }
 
-impl Dispatcher {
+impl EventDispatcher {
     pub fn new() -> Self {
         let (tx, rx) = std::sync::mpsc::channel();
         Self {

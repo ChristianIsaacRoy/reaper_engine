@@ -1,22 +1,20 @@
 use crate::event;
 use crate::layer::{Layer, LayerStack};
-use crate::window::{Window, WindowProps};
-use std::rc::Rc;
+use crate::window::{Window, WindowProps, WinitWindow};
 
 pub struct Application {
     running: bool,
     layer_stack: LayerStack,
-    // TODO: Make this a unique pointer?
-    window: Window,
-    window_ed: event::Dispatcher,
+    pub window: Box<dyn Window>, // Box because window is a trait ( we don't know how big the implementation of the Window trait is )
+    window_ed: event::EventDispatcher,
 }
 
 impl Application {
-    pub fn new() -> Application {
+    pub fn new(window: Box<dyn Window>) -> Application {
         Application {
             layer_stack: LayerStack::new(),
-            window: Window::new(&WindowProps::defaults()),
-            window_ed: event::Dispatcher::new(),
+            window,
+            window_ed: event::EventDispatcher::new(),
             running: false,
         }
     }
@@ -27,7 +25,7 @@ impl Application {
         info!("Starting the Reaper Engine...");
 
         while self.running {
-            self.layer_stack.update();
+            self.layer_stack.on_update();
             self.window.on_update(&mut self.window_ed);
 
             self.window_ed.read_all().iter().for_each(|event| {
@@ -39,26 +37,27 @@ impl Application {
     }
 
     pub fn on_event(&mut self, event: &event::Event) {
-        let handled = match event.get_event_type() {
+        match event.get_event_type() {
             event::EventType::WindowClose => self.on_window_close(&event),
-            _ => false,
+            _ => (),
         };
 
-        if !handled {
-            self.layer_stack.on_event(event);
-        }
+        self.layer_stack.on_event(event);
     }
 
-    pub fn push_layer(&mut self, layer: Rc<dyn Layer>) {
+    fn on_window_close(&mut self, _event: &event::Event) {
+        self.running = false
+    }
+
+    pub fn push_layer(&mut self, layer: Box<dyn Layer>) {
         self.layer_stack.push_layer(layer);
     }
 
-    pub fn push_overlay(&mut self, overlay: Rc<dyn Layer>) {
+    pub fn push_overlay(&mut self, overlay: Box<dyn Layer>) {
         self.layer_stack.push_overlay(overlay);
     }
 
-    fn on_window_close(&mut self, _event: &event::Event) -> bool {
-        self.running = false;
-        true
+    pub fn get_window(&self) -> &Box<dyn Window> {
+        &self.window
     }
 }
