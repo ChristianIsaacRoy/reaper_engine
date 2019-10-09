@@ -2,15 +2,17 @@
 extern crate log;
 
 mod application;
-mod event;
+mod events;
+mod imgui;
 mod layer;
 mod logger;
 mod window;
-mod imgui;
+mod winit_support;
 
-use crate::layer::Layer;
 use crate::imgui::ImGuiLayer;
-use crate::window::{Window, WindowProps, WinitWindow};
+use crate::layer::Layer;
+use crate::window::{Window, WindowProps};
+use crate::winit_support::WinitWindow;
 
 struct ExampleLayer {
     name: String,
@@ -22,7 +24,7 @@ impl Layer for ExampleLayer {
     fn on_update(&self) {
         //info!("ExampleLayer::Update")
     }
-    fn on_event(&self, event: &event::Event) -> bool {
+    fn on_event(&self, event: &events::Event) -> bool {
         trace!("{:?}", event);
         false
     }
@@ -33,12 +35,17 @@ impl Layer for ExampleLayer {
 
 fn main() {
     logger::init();
-    let window = Box::new(WinitWindow::new(&WindowProps::defaults()));
-    let mut app = application::Application::new(window);
 
-    let imgui_layer = ImGuiLayer::new("ImGui Layer", &app);
-    // imgui_layer.with_winit_window(app.get_window());
-    let example_layer = ExampleLayer { name: String::from("Example Layer") };
+    let mut window = Box::new(WinitWindow::new(&WindowProps::defaults()));
+    
+    let mut imgui_layer = ImGuiLayer::new("ImGui Layer");
+    imgui_layer.with_winit_window(window.get_winit_window());
+
+    let mut example_layer = ExampleLayer {
+        name: String::from("Example Layer"),
+    };
+
+    let mut app = application::Application::new(window);
 
     app.push_layer(Box::new(example_layer));
     app.push_layer(Box::new(imgui_layer));

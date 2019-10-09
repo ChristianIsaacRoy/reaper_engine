@@ -1,12 +1,12 @@
-use crate::event;
+use crate::events;
 use crate::layer::{Layer, LayerStack};
-use crate::window::{Window, WindowProps, WinitWindow};
+use crate::window::{Window, WindowProps};
 
 pub struct Application {
     running: bool,
     layer_stack: LayerStack,
     pub window: Box<dyn Window>, // Box because window is a trait ( we don't know how big the implementation of the Window trait is )
-    window_ed: event::EventDispatcher,
+    window_ed: events::EventDispatcher,
 }
 
 impl Application {
@@ -14,7 +14,7 @@ impl Application {
         Application {
             layer_stack: LayerStack::new(),
             window,
-            window_ed: event::EventDispatcher::new(),
+            window_ed: events::EventDispatcher::new(),
             running: false,
         }
     }
@@ -36,16 +36,16 @@ impl Application {
         info!("Closing the Reaper Engine...")
     }
 
-    pub fn on_event(&mut self, event: &event::Event) {
+    pub fn on_event(&mut self, event: &events::Event) {
         match event.get_event_type() {
-            event::EventType::WindowClose => self.on_window_close(&event),
+            events::EventType::WindowClose => self.on_window_close(&event),
             _ => (),
         };
 
         self.layer_stack.on_event(event);
     }
 
-    fn on_window_close(&mut self, _event: &event::Event) {
+    fn on_window_close(&mut self, _event: &events::Event) {
         self.running = false
     }
 

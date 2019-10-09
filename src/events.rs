@@ -3,7 +3,7 @@ use std::sync::mpsc::{Receiver, Sender};
 #[derive(Debug)]
 pub struct Event {
     pub handled: bool,
-    event_type: EventType,
+    pub event_type: EventType,
 }
 
 impl Event {
@@ -42,6 +42,7 @@ pub enum EventType {
     MouseScrolled { scroll: u32 },
 }
 
+///
 pub struct EventDispatcher {
     sender: Sender<Event>,
     receiver: Receiver<Event>,
